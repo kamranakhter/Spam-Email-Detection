@@ -84,9 +84,11 @@ Output:
 
 ## 🙋‍♂️ Author
 
-- Mohammad Kamran Akhter
-- GitHub <https://github.com/kamranakhter>
-- LinkedIn <https://www.linkedin.com/in/kamranakhter03/>
+Mohammad Kamran Akhter
+
+GitHub <https://github.com/kamranakhter>
+
+LinkedIn <https://www.linkedin.com/in/kamranakhter03/>
 
 ---
 
