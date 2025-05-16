@@ -26,7 +26,7 @@ Spam-Email-Detection/
 │ └── index.html       # Frontend HTML UI
 ├── model.pkl          # Trained ML model
 ├── vectorizer.pkl     # CountVectorizer object
-├── train_model.py     # Script to train the ML model
+├── train_model.ipynb     # Script to train the ML model
 ├── requirements.txt   # Python dependencies
 └── README.md          # Project documentation
 ```
