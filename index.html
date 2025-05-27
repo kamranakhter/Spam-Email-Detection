@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .result-box {
+            display: none;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .ham-result {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .spam-result {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        #confidence-bar {
+            height: 25px;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+        #spinner {
+            display: none;
+        }
+        textarea {
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">Email Spam Detection System</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="detection-form">
+                            <div class="mb-3">
+                                <label for="email-text" class="form-label">Enter Email Content:</label>
+                                <textarea class="form-control" id="email-text" rows="8" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <span id="button-text">Check for Spam</span>
+                                    <div id="spinner" class="spinner-border spinner-border-sm text-light ms-2" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="result-box" class="result-box text-center">
+                            <h4 class="mb-3">Result: <span id="result-text"></span></h4>
+                            <div class="progress mb-2">
+                                <div id="confidence-bar" class="progress-bar progress-bar-striped" 
+                                    role="progressbar"></div>
+                            </div>
+                            <p class="mb-0">Confidence: <span id="confidence-value"></span>%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('detection-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const emailText = document.getElementById('email-text').value;
+            const button = e.target.querySelector('button');
+            const buttonText = document.getElementById('button-text');
+            const spinner = document.getElementById('spinner');
+            
+            // Show loading state
+            button.disabled = true;
+            buttonText.textContent = 'Analyzing...';
+            spinner.style.display = 'inline-block';
+            
+            // Hide previous results
+            document.getElementById('result-box').style.display = 'none';
+            
+            // Make API request
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `email=${encodeURIComponent(emailText)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const resultBox = document.getElementById('result-box');
+                    const resultText = document.getElementById('result-text');
+                    const confidenceBar = document.getElementById('confidence-bar');
+                    const confidenceValue = document.getElementById('confidence-value');
+                    
+                    // Set result
+                    resultText.textContent = data.prediction.toUpperCase();
+                    const confidencePercent = (data.confidence * 100).toFixed(2);
+                    confidenceValue.textContent = confidencePercent;
+                    confidenceBar.style.width = `${confidencePercent}%`;
+                    
+                    // Style based on prediction
+                    resultBox.className = `result-box text-center ${data.prediction === 'Not Spam' ? 'ham-result' : 'spam-result'}`;
+                    confidenceBar.className = `progress-bar progress-bar-striped ${
+                        data.prediction === 'Not Spam' ? 'bg-success' : 'bg-danger'
+                    }`;
+                    
+                    // Show result
+                    resultBox.style.display = 'block';
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                alert(`Request failed: ${error.message}`);
+            })
+            .finally(() => {
+                // Reset button
+                button.disabled = false;
+                buttonText.textContent = 'Check for Spam';
+                spinner.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
